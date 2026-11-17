@@ -26,8 +26,8 @@ export default function Header() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <a href="#top" className="logo" aria-label="Trang chủ">
-          <span className="monogram">{site.monogram}</span>
+        <a href="#top" className="logo" aria-label="HAT Huỳnh Anh Tuấn" suppressHydrationWarning>
+          <span className="monogram">{site.monogram}</span>{' '}
           <span className="logo-name">{site.name}</span>
         </a>
         <SiteNav />

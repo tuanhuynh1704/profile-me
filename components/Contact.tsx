@@ -35,7 +35,7 @@ export default function Contact() {
                 href={c.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Liên hệ qua ${c.label}`}
+                aria-label={`${c.label} ${c.note}`}
                 data-reveal
                 style={{ ["--delay" as string]: `${index * 90}ms` }}
               >
@@ -47,7 +47,7 @@ export default function Contact() {
                   )}
                 </span>
                 <span className="contact-link-body">
-                  <span className="contact-link-title">{c.label}</span>
+                  <span className="contact-link-title">{c.label}</span>{' '}
                   <span className="contact-link-note">{c.note}</span>
                 </span>
                 <IconArrowRight size={18} className="contact-link-arrow" />

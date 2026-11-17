@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
+import { useSiteSettings } from "./SiteSettingsProvider";
 
 export type BaseSeason = "spring" | "summer" | "autumn" | "winter";
 export type SeasonMode = BaseSeason | "transition";
@@ -184,12 +185,101 @@ export function calculateDateSeason(date: Date = new Date()): {
   return { activeMode: "winter", baseSeason: "winter", festive: "noel", isMidWinter: isMid };
 }
 
+interface PinnedSeasonInfo {
+  activeMode: SeasonMode;
+  baseSeason: BaseSeason;
+  festive: "none" | "newyear" | "tet" | "spring-natural" | "beach" | "autumn" | "noel";
+  badgeLabel: string;
+  badgeIcon: string;
+  isTransition: boolean;
+  isMidWinter: boolean;
+}
+
+/** frame_key cố định (từ site settings) → seasonInfo tương ứng, bỏ qua lịch. */
+function pinnedSeasonInfo(frameKey: string): PinnedSeasonInfo {
+  switch (frameKey) {
+    case "winter":
+      return {
+        activeMode: "winter",
+        baseSeason: "winter",
+        festive: "noel",
+        badgeLabel: "Mùa Đông (Noel & Tuyết)",
+        badgeIcon: "❄️",
+        isTransition: false,
+        isMidWinter: true,
+      };
+    case "spring":
+      return {
+        activeMode: "spring",
+        baseSeason: "spring",
+        festive: "spring-natural",
+        badgeLabel: "Mùa Xuân (Ngoài dịp Tết)",
+        badgeIcon: "🌸",
+        isTransition: false,
+        isMidWinter: false,
+      };
+    case "tet":
+      return {
+        activeMode: "spring",
+        baseSeason: "spring",
+        festive: "tet",
+        badgeLabel: "Tết Nguyên Đán",
+        badgeIcon: "🧧",
+        isTransition: false,
+        isMidWinter: false,
+      };
+    case "newyear":
+      return {
+        activeMode: "spring",
+        baseSeason: "spring",
+        festive: "newyear",
+        badgeLabel: "Tết Dương Lịch",
+        badgeIcon: "🎆",
+        isTransition: false,
+        isMidWinter: false,
+      };
+    case "summer":
+      return {
+        activeMode: "summer",
+        baseSeason: "summer",
+        festive: "beach",
+        badgeLabel: "Mùa Hạ (Bãi Biển)",
+        badgeIcon: "🏖️",
+        isTransition: false,
+        isMidWinter: false,
+      };
+    case "autumn":
+      return {
+        activeMode: "autumn",
+        baseSeason: "autumn",
+        festive: "autumn",
+        badgeLabel: "Mùa Thu (Lá Phong)",
+        badgeIcon: "🍁",
+        isTransition: false,
+        isMidWinter: false,
+      };
+    default:
+      return {
+        activeMode: "winter",
+        baseSeason: "winter",
+        festive: "noel",
+        badgeLabel: "Mùa Đông (Noel & Tuyết)",
+        badgeIcon: "❄️",
+        isTransition: false,
+        isMidWinter: true,
+      };
+  }
+}
+
 export default function Atmosphere() {
+  const { settings } = useSiteSettings();
+  const frameKey = settings.frameKey;
   const [mounted, setMounted] = useState(false);
   const [isAuto, setIsAuto] = useState<boolean>(true);
   const [manualSeason, setManualSeason] = useState<BaseSeason>("winter");
   const [springSubMode, setSpringSubMode] = useState<SpringSubMode>("natural");
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const controllerRef = useRef<HTMLDivElement>(null);
   const [todayStr, setTodayStr] = useState<string>("");
 
   useEffect(() => {
@@ -228,6 +318,8 @@ export default function Atmosphere() {
 
   // Tính trạng thái mùa hiện hành
   const seasonInfo = useMemo(() => {
+    // Khung ghim từ site settings (Supabase) đè lên lịch ngày
+    if (frameKey !== "auto") return pinnedSeasonInfo(frameKey);
     if (!mounted) {
       return {
         activeMode: "winter" as SeasonMode,
@@ -383,7 +475,7 @@ export default function Atmosphere() {
         isMidWinter: true,
       };
     }
-  }, [mounted, isAuto, manualSeason, springSubMode]);
+  }, [mounted, isAuto, manualSeason, springSubMode, frameKey]);
 
   // Đồng bộ data-season, data-base-season, data-festive lên <html>
   useEffect(() => {
@@ -393,6 +485,32 @@ export default function Atmosphere() {
     root.setAttribute("data-base-season", seasonInfo.baseSeason);
     root.setAttribute("data-festive", seasonInfo.festive);
   }, [mounted, seasonInfo.activeMode, seasonInfo.baseSeason, seasonInfo.festive]);
+
+  // Đóng menu khi click/tap ra ngoài vùng controller hoặc nhấn Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (
+        target &&
+        controllerRef.current &&
+        !controllerRef.current.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
 
   const handleSelect = (choice: BaseSeason | "auto") => {
     if (choice === "auto") {
@@ -858,7 +976,7 @@ export default function Atmosphere() {
       </div>
 
       {/* Season Controller: Góc dưới bên trái */}
-      <div className="season-controller">
+      <div className="season-controller" ref={controllerRef}>
         {menuOpen && (
           <div className="season-menu" role="menu" aria-label="Cài đặt mùa nền">
             <div className="season-menu-header">
@@ -956,7 +1074,8 @@ export default function Atmosphere() {
           className="season-toggle-btn"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-expanded={menuOpen}
-          aria-label="Xem hiệu ứng mùa"
+          suppressHydrationWarning
+          aria-label={`${seasonInfo.badgeIcon} ${seasonInfo.badgeLabel} — Xem hiệu ứng mùa`}
           title={`Mùa hiện tại: ${seasonInfo.badgeLabel} (${isAuto ? "Tự động" : "Thủ công"})`}
         >
           <span className="season-icon-indicator">{seasonInfo.badgeIcon}</span>

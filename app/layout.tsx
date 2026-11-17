@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Atmosphere from "@/components/Atmosphere";
 import FloatingHUD from "@/components/FloatingHUD";
+import SiteSettingsProvider from "@/components/SiteSettingsProvider";
 
 const sans = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -39,11 +40,13 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className={sans.className}>
-        <Atmosphere />
-        <Header />
-        {children}
-        <Footer />
-        <FloatingHUD />
+        <SiteSettingsProvider>
+          <Atmosphere />
+          <Header />
+          {children}
+          <Footer />
+          <FloatingHUD />
+        </SiteSettingsProvider>
       </body>
     </html>
   );

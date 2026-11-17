@@ -177,7 +177,7 @@ export default function Projects() {
                   {p.live && (
                     <a
                       href={p.live}
-                      aria-label={`Xem trực tiếp ${p.title}`}
+                      aria-label={`Live Demo ${p.title}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="project-link-btn live-btn"
@@ -189,7 +189,7 @@ export default function Projects() {
                   {p.github && (
                     <a
                       href={p.github}
-                      aria-label={`Mã nguồn ${p.title}`}
+                      aria-label={p.isPrivate ? `GitHub (Private) — ${p.title}` : `GitHub — ${p.title}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="project-link-btn"

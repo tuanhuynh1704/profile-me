@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { site } from "@/lib/data";
 import {
   IconGitHub,
@@ -8,6 +7,7 @@ import {
   IconAward,
 } from "./Icons";
 import { SeasonalAvatarDeco } from "./SeasonalDeco";
+import AvatarPhoto from "./AvatarPhoto";
 
 function SocialIcon({ icon }: { icon: string }) {
   if (icon === "github") return <IconGitHub />;
@@ -81,53 +81,33 @@ export default function Hero() {
 
         <div className="hero-card">
           <div className="portrait-container">
-            {/* Ambient Aura & HUD Corners */}
-            <span className="portrait-glow-aura" aria-hidden="true" />
-            <span className="portrait-gradient-border" aria-hidden="true" />
-            <span className="hud-corner hud-tl" aria-hidden="true" />
-            <span className="hud-corner hud-tr" aria-hidden="true" />
-            <span className="hud-corner hud-bl" aria-hidden="true" />
-            <span className="hud-corner hud-br" aria-hidden="true" />
-
-            {/* Seasonal Full-Border Wraparound (Tuyết & Noel, Cành Mai Đào Tết, Lá Dừa Biển, Lá Phong Thu) */}
-            <SeasonalAvatarDeco />
-
-            {/* Main Portrait Card */}
-            <div className="portrait-frame">
-              <Image
-                src="/avatar.jpg"
-                alt="Ảnh chân dung Huỳnh Anh Tuấn"
-                width={420}
-                height={560}
-                priority
-                className="avatar-photo"
-              />
-
-              {/* Bottom vignette overlay */}
-              <div className="portrait-overlay" aria-hidden="true" />
-
-              {/* Top HUD Chips */}
-              <div className="portrait-top-hud">
-                <span className="status-live-pill">
-                  <span className="pulse-dot-green" aria-hidden="true" />
-                  ACTIVE
-                </span>
-                <span className="award-mini-pill">
-                  <IconAward size={13} />
-                  NTTU 2026
-                </span>
+            <div className="portrait-stage">
+              <div className="portrait-frame">
+                <AvatarPhoto />
+                <div className="portrait-overlay" aria-hidden="true" />
               </div>
+              <SeasonalAvatarDeco />
+            </div>
 
-              {/* Bottom Info HUD Card */}
-              <div className="portrait-bottom-info">
-                <div className="info-identity">
-                  <span className="info-name">Huỳnh Anh Tuấn</span>
-                  <span className="info-role">Full-stack &amp; AI Systems</span>
-                </div>
-                <div className="info-motto">
-                  <span>Build. Learn.</span>
-                  <strong>Improve. Repeat.</strong>
-                </div>
+            <div className="portrait-top-hud">
+              <span className="status-live-pill">
+                <span className="pulse-dot-green" aria-hidden="true" />
+                ACTIVE
+              </span>
+              <span className="award-mini-pill">
+                <IconAward size={13} />
+                NTTU 2026
+              </span>
+            </div>
+
+            <div className="portrait-bottom-info">
+              <div className="info-identity">
+                <span className="info-name">Huỳnh Anh Tuấn</span>
+                <span className="info-role">Full-stack &amp; AI Systems</span>
+              </div>
+              <div className="info-motto">
+                <span>Build. Learn.</span>
+                <strong>Improve. Repeat.</strong>
               </div>
             </div>
           </div>
