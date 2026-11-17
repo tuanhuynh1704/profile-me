@@ -81,3 +81,20 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-public-key>
 - Khung ghim ghi đè logic theo ngày cho **toàn bộ khách** (kể cả các mùa vừa sang); admin vẫn xem trước thay đổi ngay tại `/admin`.
 - Thêm khung mới sau này: thêm entry trong `lib/frames.ts` (frame_key là text tự do trong DB) + component/CSS khung đó — không cần đổi schema.
 - Ảnh upload đặt tên `avatar-<timestamp>.<ext>`; ảnh cũ không tự xóa (dọn thủ công trong Storage nếu muốn).
+
+---
+
+# TRẠNG THÁI (2026-11-17) — đã provision qua Management API
+
+Project **"portfolio"** đã tồn tại từ trước (`ref: jquirsouzvguscsvgoun`, region `ap-northeast-1`, Postgres 17). Các bước 1–5 trong tài liệu này **đã thực thi tự động** qua Supabase Management API (không cần làm lại):
+
+- ✅ Bảng `public.site_settings` (id=1, avatar_url null, frame_key='auto'), RLS bật.
+- ✅ Policies: `site_settings_read_public` (SELECT public) + `site_settings_write_authenticated` (ALL, `auth.role()='authenticated'`). **Đã verify**: anon PATCH → 0 rows (không ghi được).
+- ✅ Bucket `avatars` (public) + `avatars_read_public` + `avatars_write_authenticated`.
+- ✅ Auth: `site_url = https://my-profile-tunas.vercel.app`; redirect allow list: `/admin` (prod + localhost).
+- ✅ `.env.local` đã ghi (chỉ chứa **anon key** — không có service_role).
+- ❌ **Owner-only policy CHƯA áp dụng** — hiện write cho mọi user đã đăng nhập (ai có tài khoản cũng ghi được). Cần email Supabase của chủ site để siết theo `auth.jwt() ->> 'email'` — gửi email cho lead để hoàn tất.
+- ❌ **Vercel env CHƯA set** — founder tự thêm `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Production + Preview) rồi Redeploy.
+- ❌ Server dev/production trên máy (node PID 3428, `start-server.js`) chưa nạp env — cần restart để `.env.local` có hiệu lực cục bộ.
+
+> ⚠️ Token Management được dùng cho setup đã nằm trong lịch sử chat — **thu hồi ngay** tại supabase.com/dashboard/account/tokens (khuyến nghị làm bây giờ).
